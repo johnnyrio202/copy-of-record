@@ -645,6 +645,51 @@
   .receipt .btn { width: 100%; justify-content: center; margin-top: 22px; }
   .receipt .price-note { text-align: center; margin-top: 12px; }
 
+  /* ---------- beta signup form ---------- */
+  .beta-badge {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 9px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
+  .beta-form { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+  .beta-form label {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    display: block;
+    margin-bottom: 5px;
+  }
+  .beta-form input[type="text"],
+  .beta-form input[type="email"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+  .beta-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .beta-form .hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+  .beta-form button[type="submit"] { width: 100%; justify-content: center; margin-top: 4px; }
+  .beta-form button[type="submit"]:disabled { opacity: 0.6; cursor: default; }
+  .beta-status { font-size: 13px; margin-top: 10px; min-height: 1.2em; }
+  .beta-status.ok { color: var(--accent); }
+  .beta-status.err { color: #b5433a; }
+
   /* ---------- faq ---------- */
   .faq { border-top: 1px solid var(--border); }
   .faq details {
@@ -741,10 +786,10 @@
       on your own machine.
     </p>
     <div class="cta-row">
-      <a class="btn" href="#pricing">Get the toolkit — $19 →</a>
+      <a class="btn" href="#pricing">Join the beta — free →</a>
       <a class="btn ghost" href="#how">See how it works</a>
     </div>
-    <p class="price-note" style="margin-top:14px;">One-time purchase. No account, no subscription.</p>
+    <p class="price-note" style="margin-top:14px;">Beta testers get free access. No account, no subscription.</p>
   </div>
 
   <div class="mockstack">
@@ -1079,6 +1124,7 @@
   <div class="receipt-wrap">
     <div class="receipt">
       <div class="head">
+        <span class="beta-badge">Beta — free access</span>
         <p class="eyebrow">Copy of Record</p>
         <h3>Full archive toolkit</h3>
       </div>
@@ -1087,12 +1133,65 @@
         <div class="line"><span>Contact scoring engine</span><span>included</span></div>
         <div class="line"><span>Re-runs on future exports</span><span>included</span></div>
       </div>
-      <div class="total"><span>Total</span><span>$19</span></div>
-      <a class="btn" href="#">Get the toolkit →</a>
-      <p class="price-note">Charged once. Delivered as a link to the local tool page.</p>
+      <div class="total"><span>Beta price</span><span>Free</span></div>
+      <form class="beta-form" id="betaForm">
+        <input class="hp-field" type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div>
+          <label for="betaName">Name (optional)</label>
+          <input type="text" id="betaName" name="name" placeholder="Jane Doe" autocomplete="name">
+        </div>
+        <div>
+          <label for="betaEmail">Email</label>
+          <input type="email" id="betaEmail" name="email" required placeholder="you@example.com" autocomplete="email">
+        </div>
+        <button class="btn" type="submit">Join the beta — free →</button>
+        <p class="beta-status" id="betaStatus" role="status"></p>
+      </form>
+      <p class="price-note">Beta testers get the full toolkit free. Regular price will be $19, one-time, no renewals.</p>
     </div>
   </div>
 </section>
+<script>
+(function () {
+  var form = document.getElementById('betaForm');
+  if (!form) return;
+  var status = document.getElementById('betaStatus');
+  var endpoint = 'https://copy-of-record-delivery.vercel.app/api/beta-signup';
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]');
+    var payload = {
+      name: form.name.value,
+      email: form.email.value,
+      hp: form.hp.value,
+    };
+    btn.disabled = true;
+    status.className = 'beta-status';
+    status.textContent = 'Sending…';
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok && data.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok) {
+          status.className = 'beta-status ok';
+          status.textContent = 'Check your inbox — your toolkit link is on the way.';
+          form.reset();
+        } else {
+          status.className = 'beta-status err';
+          status.textContent = 'Something went wrong. Try again, or email advisor@globalist.pro directly.';
+        }
+      })
+      .catch(function () {
+        status.className = 'beta-status err';
+        status.textContent = 'Something went wrong. Try again, or email advisor@globalist.pro directly.';
+      })
+      .finally(function () { btn.disabled = false; });
+  });
+})();
+</script>
 
 <section class="wrap tight">
   <div class="section-head">
