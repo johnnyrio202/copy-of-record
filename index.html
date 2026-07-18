@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy of Record — your LinkedIn archive, finally legible</title>
+<meta name="description" content="LinkedIn already owes you a full copy of your own activity. Copy of Record turns your official data export into a readable dashboard and a scored contact list, built entirely on your own machine.">
+<style>
+  :root {
+    --bg: #f3f4ee;
+    --surface: #eceee3;
+    --surface-raised: #f8f9f3;
+    --ink: #17191a;
+    --ink-muted: #52564c;
+    --ink-faint: #83887c;
+    --accent: #2c4a6e;
+    --accent-soft: #2c4a6e14;
+    --border: rgba(23, 25, 26, 0.14);
+    --border-strong: rgba(23, 25, 26, 0.28);
+    --shadow: rgba(23, 25, 26, 0.18);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --bg: #14171a;
+      --surface: #1b1f22;
+      --surface-raised: #20252a;
+      --ink: #ecefe8;
+      --ink-muted: #a4aaa0;
+      --ink-faint: #6d746c;
+      --accent: #7fa4cf;
+      --accent-soft: #7fa4cf1f;
+      --border: rgba(236, 239, 232, 0.14);
+      --border-strong: rgba(236, 239, 232, 0.26);
+      --shadow: rgba(0, 0, 0, 0.45);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171a;
+    --surface: #1b1f22;
+    --surface-raised: #20252a;
+    --ink: #ecefe8;
+    --ink-muted: #a4aaa0;
+    --ink-faint: #6d746c;
+    --accent: #7fa4cf;
+    --accent-soft: #7fa4cf1f;
+    --border: rgba(236, 239, 232, 0.14);
+    --border-strong: rgba(236, 239, 232, 0.26);
+    --shadow: rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  .serif {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  }
+  .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- nav ---------- */
+  nav.wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+  .wordmark {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .wordmark .mark {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    display: inline-block;
+  }
+  nav .links {
+    display: flex;
+    gap: 28px;
+    font-size: 14px;
+  }
+  nav .links a { color: var(--ink-muted); text-decoration: none; }
+  nav .links a:hover { color: var(--ink); }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding: 40px 0 88px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 4.6vw, 54px);
+    line-height: 1.06;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .hero .lede {
+    margin-top: 22px;
+    font-size: 18px;
+    color: var(--ink-muted);
+    max-width: 46ch;
+  }
+  .hero .eyebrow { margin-bottom: 16px; }
+  .cta-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: var(--surface-raised);
+    border: 1px solid var(--accent);
+    padding: 13px 22px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .btn:hover { opacity: 0.86; }
+  .btn.ghost {
+    background: transparent;
+    color: var(--ink);
+    border-color: var(--border-strong);
+  }
+  .price-note { font-size: 13px; color: var(--ink-faint); }
+
+  /* preview mock */
+  .mockstack { position: relative; }
+  .stamp {
+    position: absolute;
+    top: -14px;
+    right: 6px;
+    z-index: 3;
+    width: 116px;
+    height: 116px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--accent);
+    transform: rotate(-9deg);
+    background: var(--bg);
+  }
+  .stamp::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+  }
+  .stamp span {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.35;
+    padding: 0 12px;
+  }
+  .mockcard {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 18px 40px -22px var(--shadow);
+    transform: rotate(1.4deg);
+    overflow: hidden;
+  }
+  .mockcard .chrome {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mockcard .chrome i {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border-strong);
+    display: block;
+  }
+  .mockcard .body { padding: 18px 18px 20px; }
+  .mockcard .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .mockcard .tile {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 10px;
+  }
+  .mockcard .tile b {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 18px;
+  }
+  .mockcard .tile span { font-size: 11px; color: var(--ink-faint); }
+  .mockcard svg { display: block; width: 100%; height: 64px; }
+  .mockcard .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+  }
+
+  /* ---------- trust strip ---------- */
+  .trust {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+  }
+  .trust .wrap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .trust .item {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--ink-muted);
+  }
+  .trust .item b { color: var(--ink); }
+
+  /* ---------- section shell ---------- */
+  section { padding: 88px 0; }
+  section.tight { padding: 64px 0; }
+  .section-head { margin-bottom: 40px; max-width: 62ch; }
+  .section-head h2 {
+    font-size: clamp(26px, 3vw, 32px);
+    font-weight: 400;
+  }
+  .section-head p {
+    margin-top: 12px;
+    color: var(--ink-muted);
+  }
+
+  /* ---------- insights intro ---------- */
+  .insights-lede { max-width: 64ch; margin-bottom: 30px; }
+  .insights-lede p { color: var(--ink-muted); font-size: 16px; }
+  .questions .row { grid-template-columns: 200px 1fr; }
+  .questions dt { color: var(--accent); }
+
+  /* ---------- sample report ---------- */
+  .sample-caption {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  .sample-frame {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 30px 60px -34px var(--shadow);
+    overflow: hidden;
+  }
+  .sample-frame .chrome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sample-frame .chrome i {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border-strong);
+    display: block;
+  }
+  .sample-frame .chrome .url {
+    margin-left: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+  }
+  .sample-body { padding: 28px 30px 32px; }
+  .sample-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .sample-tiles .tile {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 14px;
+  }
+  .sample-tiles .tile b {
+    display: block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+  }
+  .sample-tiles .tile span { font-size: 12px; color: var(--ink-faint); }
+  .sample-charts {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+  }
+  .sample-panel {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px 18px 18px;
+  }
+  .sample-panel h4 {
+    margin: 0 0 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+  .sample-panel svg { display: block; width: 100%; height: 130px; }
+  .barlist { display: grid; gap: 10px; }
+  .barlist .row {
+    display: grid;
+    grid-template-columns: 96px 1fr 34px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .barlist .track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .barlist .fill { height: 100%; background: var(--accent); }
+  .barlist .pct {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11.5px;
+    text-align: right;
+    color: var(--ink-faint);
+  }
+  .sample-timeline { margin-top: 20px; }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 7px 0;
+    font-size: 13px;
+  }
+  .tl-row .label { color: var(--ink-muted); }
+  .tl-row .track { position: relative; height: 9px; background: var(--border); border-radius: 2px; }
+  .tl-row .bar { position: absolute; top: 0; height: 100%; background: var(--accent); border-radius: 2px; opacity: 0.85; }
+
+  .frame-stack { display: grid; gap: 22px; }
+  .frame-label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11.5px; color: var(--ink-faint); text-align: center; margin: -6px 0 0;
+  }
+
+  .pill-mock { display: inline-flex; align-items: center; font-size: 12px; padding: 5px 10px;
+    border-radius: 999px; margin: 3px 5px 3px 0; border: 1px solid var(--border); }
+  .pill-mock.hit { color: var(--accent); border-color: var(--accent); }
+  .pill-mock.gap { color: var(--ink-faint); }
+
+  .rec-mini { padding: 9px 0; border-top: 1px solid var(--border); }
+  .rec-mini:first-child { border-top: none; padding-top: 0; }
+  .rec-mini .who { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; }
+  .rec-mini .who span:last-child { font-weight: 400; color: var(--ink-faint); font-size: 11px; }
+  .rec-mini .snippet { margin-top: 4px; font-size: 12px; color: var(--ink-muted); line-height: 1.5; }
+
+  .mini-rows { display: grid; gap: 2px; }
+  .mini-rows .row2 { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-muted);
+    padding: 7px 0; border-top: 1px solid var(--border); }
+  .mini-rows .row2:first-child { border-top: none; padding-top: 0; }
+  .mini-rows .row2 b { color: var(--ink); font-weight: 600; }
+
+  .warm-mock input.fake {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 9px 11px; font-size: 12.5px; color: var(--ink-muted); margin-bottom: 12px;
+    font-family: inherit;
+  }
+  .warm-mock .wrow { display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12.5px; padding: 7px 0; border-top: 1px solid var(--border); }
+  .warm-mock .wrow:first-of-type { border-top: none; padding-top: 0; }
+  .warm-mock .wscore {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-weight: 700; color: var(--accent);
+  }
+
+  .sample-frame.dark { background: #1c1440; border-color: rgba(255,255,255,0.14); }
+  .sample-frame.dark .chrome { border-color: rgba(255,255,255,0.14); }
+  .sample-frame.dark .chrome i { background: rgba(255,255,255,0.24); }
+  .sample-frame.dark .chrome .url { color: #9a92c4; }
+  .wrapped-mock-body {
+    padding: 30px 32px 34px;
+    background: radial-gradient(circle at 20% 0%, #1c1440, #14102b 65%);
+    color: #fff;
+  }
+  .wrapped-mock-body .eyebrow2 {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a92c4; margin-bottom: 10px;
+  }
+  .wrapped-mock-body h4 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 400; font-size: 25px; margin: 0 0 20px;
+  }
+  .wmini-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .wmini-row .block {
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px; padding: 16px 16px;
+  }
+  .wmini-row .block .label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: #9a92c4; margin-bottom: 8px;
+  }
+  .wmini-row .block .big {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums;
+  }
+  .wmini-row .block .big.accent2 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 400; font-size: 18px; color: #ff6a5e;
+  }
+
+  /* ---------- steps (card catalog) ---------- */
+  .steps {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+  .step {
+    background: var(--surface);
+    padding: 22px 20px 24px;
+    scroll-snap-align: start;
+    position: relative;
+    min-width: 220px;
+  }
+  .step::before {
+    content: attr(data-tab);
+    position: absolute;
+    top: -1px;
+    left: 20px;
+    transform: translateY(-100%);
+    background: var(--accent);
+    color: var(--surface-raised);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 4px 8px;
+    border-radius: 2px 2px 0 0;
+  }
+  .step h3 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 400;
+    font-size: 19px;
+    margin-top: 10px;
+  }
+  .step p {
+    color: var(--ink-muted);
+    font-size: 14.5px;
+    margin-top: 10px;
+  }
+  .step .note {
+    margin-top: 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    border-top: 1px dashed var(--border-strong);
+    padding-top: 10px;
+  }
+
+  /* ---------- deliverables ---------- */
+  .folders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+  .folder {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 26px;
+    position: relative;
+  }
+  .folder .tab {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 9px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  .folder h3 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 400;
+    font-size: 22px;
+  }
+  .folder ul {
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .folder li {
+    padding: 9px 0;
+    border-top: 1px solid var(--border);
+    font-size: 14.5px;
+    color: var(--ink-muted);
+  }
+  .folder li:first-child { border-top: none; }
+  .folder li b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- privacy ledger ---------- */
+  .ledger {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 30px 32px;
+  }
+  .ledger dl {
+    margin: 20px 0 0;
+    display: grid;
+    gap: 14px;
+  }
+  .ledger .row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .ledger .row:first-child { padding-top: 0; border-top: none; }
+  .ledger dt {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .ledger dd { margin: 0; color: var(--ink-muted); font-size: 15px; }
+
+  /* ---------- pricing receipt ---------- */
+  .receipt-wrap { display: flex; justify-content: center; }
+  .receipt {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 50px -30px var(--shadow);
+    width: 100%;
+    max-width: 420px;
+    padding: 32px 30px 28px;
+  }
+  .receipt .head {
+    text-align: center;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+  .receipt .head .eyebrow { justify-content: center; }
+  .receipt .head h3 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 400;
+    font-size: 21px;
+    margin-top: 8px;
+  }
+  .receipt .lines { margin-top: 20px; }
+  .receipt .line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14.5px;
+    padding: 7px 0;
+    color: var(--ink-muted);
+  }
+  .receipt .line span:last-child {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .receipt .total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-strong);
+    font-size: 16px;
+  }
+  .receipt .total span:last-child {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 24px;
+    font-variant-numeric: tabular-nums;
+  }
+  .receipt .btn { width: 100%; justify-content: center; margin-top: 22px; }
+  .receipt .price-note { text-align: center; margin-top: 12px; }
+
+  /* ---------- faq ---------- */
+  .faq { border-top: 1px solid var(--border); }
+  .faq details {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+  }
+  .faq summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-size: 16.5px;
+    font-weight: 600;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+";
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    color: var(--ink-faint);
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq p {
+    margin: 14px 0 0;
+    color: var(--ink-muted);
+    max-width: 64ch;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .faq summary::after, .btn { transition: none; }
+  }
+
+  /* ---------- footer ---------- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0 56px;
+  }
+  footer .tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+  }
+  footer .tags span {
+    border: 1px solid var(--border-strong);
+    padding: 4px 9px;
+    border-radius: 2px;
+  }
+  footer .fine {
+    margin-top: 20px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    max-width: 60ch;
+  }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; }
+    .folders { grid-template-columns: 1fr; }
+    .trust .wrap { grid-template-columns: 1fr; gap: 10px; }
+    .ledger .row { grid-template-columns: 1fr; gap: 4px; }
+    .sample-tiles { grid-template-columns: repeat(2, 1fr); }
+    .sample-charts { grid-template-columns: 1fr; }
+    .wmini-row { grid-template-columns: 1fr; }
+    .tl-row { grid-template-columns: 1fr; gap: 6px; }
+    nav .links { display: none; }
+  }
+</style>
+</head>
+<body>
+<nav class="wrap">
+  <div class="wordmark"><span class="mark"></span>Copy of Record</div>
+  <div class="links">
+    <a href="#insights">Insights</a>
+    <a href="#how">How it works</a>
+    <a href="#get">What you get</a>
+    <a href="#privacy">Privacy</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <div>
+    <p class="eyebrow">A private-use LinkedIn export toolkit</p>
+    <h1 class="serif">Your LinkedIn archive,<br>finally legible.</h1>
+    <p class="lede">
+      LinkedIn already owes you a full copy of your own activity — every connection,
+      endorsement, invitation, and year of history. Copy of Record turns that raw
+      export into a readable dashboard and a scored contact list, built entirely
+      on your own machine.
+    </p>
+    <div class="cta-row">
+      <a class="btn" href="#pricing">Get the toolkit — $19 →</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <p class="price-note" style="margin-top:14px;">One-time purchase. No account, no subscription.</p>
+  </div>
+
+  <div class="mockstack">
+    <div class="stamp"><span>Processed<br>locally · never<br>uploaded</span></div>
+    <div class="mockcard">
+      <div class="chrome"><i></i><i></i><i></i></div>
+      <div class="body">
+        <div class="tiles">
+          <div class="tile"><b>17,364</b><span>Connections</span></div>
+          <div class="tile"><b>412</b><span>Endorsements</span></div>
+          <div class="tile"><b>86</b><span>Top prospects</span></div>
+        </div>
+        <svg viewBox="0 0 300 64" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="0,52 30,48 60,46 90,40 120,36 150,30 180,26 210,18 240,14 270,9 300,4"
+            fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <polyline points="0,52 30,48 60,46 90,40 120,36 150,30 180,26 210,18 240,14 270,9 300,4 300,64 0,64"
+            fill="var(--accent-soft)" stroke="none"/>
+        </svg>
+        <div class="row"><span>2011</span><span>Network growth</span><span>2026</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div class="wrap">
+    <div class="item"><b>Zero uploads</b> — your archive file never leaves your browser</div>
+    <div class="item"><b>One-time fee</b> — no subscription, no recurring charge</div>
+    <div class="item"><b>Yours to keep</b> — plain files on your disk, open anytime</div>
+  </div>
+</div>
+
+<section id="insights" class="wrap tight">
+  <div class="insights-lede">
+    <p class="eyebrow">What it actually tells you</p>
+    <h2 class="serif">Answers LinkedIn's own app won't give you</h2>
+    <p>The LinkedIn app is built to keep you scrolling, not to show you your
+      own network clearly. Underneath the feed sits years of data about who
+      you know, who's actually engaged with you, and how your reputation has
+      taken shape — Copy of Record reads all of it and turns it into
+      something you can act on, entirely on your own machine.</p>
+  </div>
+  <div class="ledger questions">
+    <dl>
+      <div class="row">
+        <dt>Warm intros</dt>
+        <dd>Who do you already know at the companies you're trying to reach? — the contact ledger's warm intro finder</dd>
+      </div>
+      <div class="row">
+        <dt>Dormant relationships</dt>
+        <dd>Which of your strongest conversations have gone quiet for over a year? — the messaging activity report</dd>
+      </div>
+      <div class="row">
+        <dt>Your actual reputation</dt>
+        <dd>Does your headline match what people actually endorse you for? — the skill positioning report</dd>
+      </div>
+      <div class="row">
+        <dt>Overdue asks</dt>
+        <dd>Who should you ask for a recommendation — and who's waiting on one from you? — the recommendations audit</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section id="sample" class="wrap tight">
+  <div class="section-head">
+    <p class="eyebrow">What lands in your browser</p>
+    <h2 class="serif">A sample report</h2>
+    <p>Every chart below is built the same way yours will be — read straight
+      out of your archive's CSV files, rendered as plain HTML and SVG.</p>
+  </div>
+
+  <div class="sample-frame">
+    <div class="chrome">
+      <i></i><i></i><i></i>
+      <span class="url">linkedin-dashboard.html — opened locally, no server</span>
+    </div>
+    <div class="sample-body">
+      <div class="sample-tiles">
+        <div class="tile"><b>6,540</b><span>Connections</span></div>
+        <div class="tile"><b>312</b><span>Endorsements received</span></div>
+        <div class="tile"><b>41</b><span>Companies followed</span></div>
+        <div class="tile"><b>12</b><span>Courses completed</span></div>
+      </div>
+      <div class="sample-charts">
+        <div class="sample-panel">
+          <h4>Network growth</h4>
+          <svg viewBox="0 0 420 130" preserveAspectRatio="none" aria-hidden="true">
+            <polyline points="0,112 40,108 80,104 120,96 160,90 200,78 240,68 280,52 320,40 360,26 400,14 420,10"
+              fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+            <polyline points="0,112 40,108 80,104 120,96 160,90 200,78 240,68 280,52 320,40 360,26 400,14 420,10 420,130 0,130"
+              fill="var(--accent-soft)" stroke="none"/>
+          </svg>
+        </div>
+        <div class="sample-panel">
+          <h4>Where connections work</h4>
+          <div class="barlist">
+            <div class="row"><span>Google</span><div class="track"><div class="fill" style="width:82%"></div></div><span class="pct">312</span></div>
+            <div class="row"><span>Microsoft</span><div class="track"><div class="fill" style="width:64%"></div></div><span class="pct">241</span></div>
+            <div class="row"><span>Deloitte</span><div class="track"><div class="fill" style="width:51%"></div></div><span class="pct">198</span></div>
+            <div class="row"><span>Accenture</span><div class="track"><div class="fill" style="width:38%"></div></div><span class="pct">146</span></div>
+            <div class="row"><span>Salesforce</span><div class="track"><div class="fill" style="width:29%"></div></div><span class="pct">112</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="sample-panel sample-timeline">
+        <h4>Career timeline</h4>
+        <div class="tl-row"><span class="label">Director · Initech</span><div class="track"><div class="bar" style="left:78%; width:22%;"></div></div></div>
+        <div class="tl-row"><span class="label">Senior PM · Globex</span><div class="track"><div class="bar" style="left:46%; width:34%;"></div></div></div>
+        <div class="tl-row"><span class="label">Product Manager · Acme Corp</span><div class="track"><div class="bar" style="left:8%; width:40%;"></div></div></div>
+      </div>
+      <div class="sample-charts" style="margin-top:20px;">
+        <div class="sample-panel">
+          <h4>Skill positioning</h4>
+          <p style="font-size:12px; color:var(--ink-faint); margin:0 0 10px;">Backed by your headline &amp; endorsements:</p>
+          <div style="margin-bottom:12px;">
+            <span class="pill-mock hit">Project Management</span>
+            <span class="pill-mock hit">Consulting</span>
+            <span class="pill-mock hit">Cybersecurity</span>
+          </div>
+          <p style="font-size:12px; color:var(--ink-faint); margin:0 0 10px;">Endorsed heavily, missing from your headline:</p>
+          <div>
+            <span class="pill-mock gap">Strategy · 196</span>
+            <span class="pill-mock gap">Leadership · 119</span>
+          </div>
+        </div>
+        <div class="sample-panel">
+          <h4>Recommendations received</h4>
+          <div class="rec-mini">
+            <div class="who"><span>Daniel R. — Director of Eng.</span><span>Mar 2019</span></div>
+            <p class="snippet">"One of the most dependable operators I've worked with — owns problems end to end."</p>
+          </div>
+          <div class="rec-mini">
+            <div class="who"><span>Priya K. — VP Marketing</span><span>Aug 2021</span></div>
+            <p class="snippet">"Sharp strategic thinker who turns ambiguous asks into shippable plans."</p>
+          </div>
+        </div>
+      </div>
+      <div class="sample-charts" style="margin-top:20px;">
+        <div class="sample-panel">
+          <h4>Who you talk to most</h4>
+          <div class="barlist">
+            <div class="row"><span>Sean K.</span><div class="track"><div class="fill" style="width:88%"></div></div><span class="pct">62</span></div>
+            <div class="row"><span>Priya M.</span><div class="track"><div class="fill" style="width:58%"></div></div><span class="pct">41</span></div>
+            <div class="row"><span>Daniel R.</span><div class="track"><div class="fill" style="width:47%"></div></div><span class="pct">33</span></div>
+          </div>
+        </div>
+        <div class="sample-panel">
+          <h4>Worth reviving</h4>
+          <div class="mini-rows">
+            <div class="row2"><b>Jordan W.</b><span>34 msgs · last Feb 2024</span></div>
+            <div class="row2"><b>Casey L.</b><span>19 msgs · last Sep 2023</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="frame-label">dashboard.html</p>
+
+  <div class="frame-stack" style="margin-top:26px;">
+    <div class="sample-frame">
+      <div class="chrome">
+        <i></i><i></i><i></i>
+        <span class="url">contacts-explorer.html — opened locally, no server</span>
+      </div>
+      <div class="sample-body">
+        <div class="sample-tiles">
+          <div class="tile"><b>6,540</b><span>Total contacts</span></div>
+          <div class="tile"><b>4</b><span>Past colleagues</span></div>
+          <div class="tile"><b>1,180</b><span>Engaged</span></div>
+          <div class="tile"><b>22</b><span>Score 50+</span></div>
+        </div>
+        <div class="sample-panel warm-mock">
+          <h4>Warm intro finder</h4>
+          <input class="fake" type="text" value="Stripe" readonly>
+          <div class="wrow"><span>Jordan W. — Senior Engineer</span><span class="wscore">78</span></div>
+          <div class="wrow"><span>Casey L. — Product Manager</span><span class="wscore">61</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="frame-label">contacts-explorer.html</p>
+
+    <div class="sample-frame dark">
+      <div class="chrome">
+        <i></i><i></i><i></i>
+        <span class="url">wrapped.html — built to share</span>
+      </div>
+      <div class="wrapped-mock-body">
+        <p class="eyebrow2">Through June 2026</p>
+        <h4>Your 2026 on LinkedIn</h4>
+        <div class="wmini-row">
+          <div class="block"><div class="label">New connections</div><div class="big">214</div></div>
+          <div class="block"><div class="label">Endorsements</div><div class="big">38</div></div>
+          <div class="block"><div class="label">Top skill</div><div class="big accent2">Cybersecurity</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="frame-label">wrapped.html</p>
+  </div>
+
+  <p class="sample-caption">Sample data shown for illustration — not a real account. Your report reflects only your own archive.</p>
+</section>
+
+<section id="how" class="wrap">
+  <div class="section-head">
+    <p class="eyebrow">The process — five steps, one sitting each</p>
+    <h2 class="serif">How it works</h2>
+    <p>Two of these steps happen on LinkedIn's own site. We only take over once you
+      already have the file in hand.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step" data-tab="Step 1">
+      <h3 class="serif">Request your archive</h3>
+      <p>On LinkedIn: Settings &amp; Privacy → Data privacy → Get a copy of your
+        data → "Download larger data archive" → Request archive.</p>
+      <div class="note">On linkedin.com — we walk you through every click</div>
+    </div>
+    <div class="step" data-tab="Step 2">
+      <h3 class="serif">Wait for LinkedIn's email</h3>
+      <p>LinkedIn — not us — emails you directly the moment your archive is
+        ready, anywhere from ten minutes to a few days later. We never see
+        that email address; there's nothing for Copy of Record to send.</p>
+      <div class="note">Typical wait: 10 min – 72 hrs · sent by linkedin.com</div>
+    </div>
+    <div class="step" data-tab="Step 3">
+      <h3 class="serif">Download the zip</h3>
+      <p>Save the file LinkedIn sends you. Don't unzip it — the toolkit reads
+        it directly, exactly as it arrives.</p>
+      <div class="note">One .zip file, no editing needed</div>
+    </div>
+    <div class="step" data-tab="Step 4">
+      <h3 class="serif">Drop it into the toolkit</h3>
+      <p>Open Copy of Record and drag the zip in. Everything runs as JavaScript
+        in your own browser tab — nothing is transmitted anywhere.</p>
+      <div class="note">Processing time: under a minute</div>
+    </div>
+    <div class="step" data-tab="Step 5">
+      <h3 class="serif">Keep your files</h3>
+      <p>Two plain HTML files are generated on your machine. Save them, open
+        them offline, forever — no login, no expiry.</p>
+      <div class="note">Files are yours — re-run anytime for free</div>
+    </div>
+  </div>
+</section>
+
+<section id="get" class="wrap tight">
+  <div class="section-head">
+    <p class="eyebrow">What the toolkit builds</p>
+    <h2 class="serif">Eight reports, three files, one export</h2>
+  </div>
+  <div class="folders">
+    <div class="folder">
+      <span class="tab">Dashboard</span>
+      <h3 class="serif">The network dashboard</h3>
+      <ul>
+        <li><b>Network growth</b> — every connection, plotted by the month you made it</li>
+        <li><b>Career timeline</b> — your own positions, reconstructed as a Gantt view</li>
+        <li><b>Skill positioning</b> — where your endorsed reputation and your headline disagree</li>
+        <li><b>Recommendations audit</b> — everything written about you, and everyone you've vouched for</li>
+        <li><b>Endorsement reciprocity</b> — who's endorsed you that you haven't endorsed back, and vice versa</li>
+        <li><b>Messaging activity</b> — who you talk to most, and threads worth reviving</li>
+        <li><b>Ad-targeting profile</b> — exactly how LinkedIn's ad system segments you</li>
+        <li><b>Print-ready</b> — one click to Print / Save as PDF, formatted for paper</li>
+      </ul>
+    </div>
+    <div class="folder">
+      <span class="tab">Contact ledger</span>
+      <h3 class="serif">The scored contact list</h3>
+      <ul>
+        <li><b>Classified</b> — every connection tagged by seniority and function</li>
+        <li><b>Flagged</b> — past colleagues and already-engaged contacts surfaced automatically</li>
+        <li><b>Scored</b> — a 0–100 outreach-priority score, sortable and filterable</li>
+        <li><b>Warm intro finder</b> — paste target companies, see who you already know there</li>
+        <li><b>Searchable</b> — by name, company, or title, across the full list</li>
+        <li><b>Exportable</b> — filtered results as CSV, ready for a CRM or an outreach tool</li>
+        <li><b>Print-ready</b> — print your full filtered list, not just the visible page</li>
+      </ul>
+    </div>
+    <div class="folder">
+      <span class="tab">Wrapped</span>
+      <h3 class="serif">Your year, recapped</h3>
+      <ul>
+        <li><b>One screen</b> — new connections, endorsements, top skill, top new company, courses, events</li>
+        <li><b>Built to share</b> — bold, single-screen layout, made for a screenshot</li>
+        <li><b>Always current</b> — regenerate anytime as your archive grows</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="wrap tight">
+  <div class="section-head">
+    <p class="eyebrow">The privacy terms, plainly</p>
+    <h2 class="serif">What we never do</h2>
+  </div>
+  <div class="ledger">
+    <dl>
+      <div class="row">
+        <dt>Never see it</dt>
+        <dd>Your archive is read by your browser and never transmitted to any server — including ours.</dd>
+      </div>
+      <div class="row">
+        <dt>Never store it</dt>
+        <dd>Nothing about your connections, employer history, or messages is logged, cached, or retained anywhere.</dd>
+      </div>
+      <div class="row">
+        <dt>Never require login</dt>
+        <dd>No account, no LinkedIn OAuth, no password. Payment unlocks the tool page — that's the whole relationship.</dd>
+      </div>
+      <div class="row">
+        <dt>Never touch your account</dt>
+        <dd>We don't automate LinkedIn, request data on your behalf, or ask for your credentials. You click every button yourself, on linkedin.com.</dd>
+      </div>
+      <div class="row">
+        <dt>Read-only, always</dt>
+        <dd>The toolkit only reads the archive you give it. It never writes back to LinkedIn, changes your profile, or contacts LinkedIn's servers in any way.</dd>
+      </div>
+      <div class="row">
+        <dt>Only as complete as your export</dt>
+        <dd>Every number in your report is a direct read of what LinkedIn included in your archive — nothing is added, inferred, or independently verified. If a category is thin, delayed, or missing on LinkedIn's end, your report will reflect that too.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section id="pricing" class="wrap tight">
+  <div class="section-head" style="text-align:center; margin: 0 auto 40px;">
+    <p class="eyebrow" style="justify-content:center; display:flex;">Pricing</p>
+    <h2 class="serif">One receipt. No renewals.</h2>
+  </div>
+  <div class="receipt-wrap">
+    <div class="receipt">
+      <div class="head">
+        <p class="eyebrow">Copy of Record</p>
+        <h3>Full archive toolkit</h3>
+      </div>
+      <div class="lines">
+        <div class="line"><span>Dashboard generator</span><span>included</span></div>
+        <div class="line"><span>Contact scoring engine</span><span>included</span></div>
+        <div class="line"><span>Re-runs on future exports</span><span>included</span></div>
+      </div>
+      <div class="total"><span>Total</span><span>$19</span></div>
+      <a class="btn" href="#">Get the toolkit →</a>
+      <p class="price-note">Charged once. Delivered as a link to the local tool page.</p>
+    </div>
+  </div>
+</section>
+
+<section class="wrap tight">
+  <div class="section-head">
+    <p class="eyebrow">Before you ask</p>
+    <h2 class="serif">Questions on file</h2>
+  </div>
+  <div class="faq">
+    <details open>
+      <summary>Is this allowed by LinkedIn?</summary>
+      <p>Yes. You're using LinkedIn's own official export feature — the same
+        one required under GDPR and CCPA. We never scrape your profile, log
+        in on your behalf, or automate your account in any way.</p>
+    </details>
+    <details>
+      <summary>Do you ever see my data?</summary>
+      <p>No. The toolkit is a page of JavaScript that runs in your browser.
+        Your zip file is read from your disk and processed there — it's
+        never uploaded, and we have no server that could receive it.</p>
+    </details>
+    <details>
+      <summary>What if a file is missing from my export?</summary>
+      <p>LinkedIn lets you choose which categories to include. The toolkit
+        builds around whatever you provide — skip a category, lose that one
+        panel, everything else still works.</p>
+    </details>
+    <details>
+      <summary>Can I run it again later?</summary>
+      <p>Yes. Request a fresh archive from LinkedIn anytime and re-run the
+        same tool page at no extra cost — your purchase isn't tied to a
+        single export.</p>
+    </details>
+  </div>
+</section>
+
+<footer class="wrap">
+  <div class="tags">
+    <span>LinkedIn data export</span>
+    <span>personal analytics</span>
+    <span>outreach prep</span>
+    <span>runs locally</span>
+  </div>
+  <p class="fine">
+    Copy of Record is an independent tool and is not affiliated with, endorsed by,
+    or sponsored by LinkedIn Corporation. "LinkedIn" is a trademark of LinkedIn
+    Corporation. This toolkit only processes the data export LinkedIn provides
+    directly to you, in your own browser.
+  </p>
+</footer>
+</body>
+</html>
