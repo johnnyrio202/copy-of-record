@@ -786,10 +786,10 @@
       on your own machine.
     </p>
     <div class="cta-row">
-      <a class="btn" href="#pricing">Join the beta — free →</a>
+      <a class="btn" href="#pricing">Get the toolkit — $19 →</a>
       <a class="btn ghost" href="#how">See how it works</a>
     </div>
-    <p class="price-note" style="margin-top:14px;">Beta testers get free access. No account, no subscription.</p>
+    <p class="price-note" style="margin-top:14px;">One-time purchase. Have a registration code? It's free. No account, no subscription.</p>
   </div>
 
   <div class="mockstack">
@@ -1124,7 +1124,6 @@
   <div class="receipt-wrap">
     <div class="receipt">
       <div class="head">
-        <span class="beta-badge">Beta — free access</span>
         <p class="eyebrow">Copy of Record</p>
         <h3>Full archive toolkit</h3>
       </div>
@@ -1133,7 +1132,7 @@
         <div class="line"><span>Contact scoring engine</span><span>included</span></div>
         <div class="line"><span>Re-runs on future exports</span><span>included</span></div>
       </div>
-      <div class="total"><span>Beta price</span><span>Free</span></div>
+      <div class="total"><span>Total</span><span>$19</span></div>
       <form class="beta-form" id="betaForm">
         <input class="hp-field" type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div>
@@ -1144,10 +1143,14 @@
           <label for="betaEmail">Email</label>
           <input type="email" id="betaEmail" name="email" required placeholder="you@example.com" autocomplete="email">
         </div>
-        <button class="btn" type="submit">Join the beta — free →</button>
+        <div>
+          <label for="betaCode">Registration code</label>
+          <input type="text" id="betaCode" name="code" required placeholder="Have a code? Enter it here" autocomplete="off">
+        </div>
+        <button class="btn" type="submit">Redeem code & get the toolkit →</button>
         <p class="beta-status" id="betaStatus" role="status"></p>
       </form>
-      <p class="price-note">Beta testers get the full toolkit free. Regular price will be $19, one-time, no renewals.</p>
+      <p class="price-note">Have a registration code? It waives the $19 — you'll get the toolkit free. No code yet? Reply to any of our emails to request one.</p>
     </div>
   </div>
 </section>
@@ -1163,6 +1166,7 @@
     var payload = {
       name: form.name.value,
       email: form.email.value,
+      code: form.code.value,
       hp: form.hp.value,
     };
     btn.disabled = true;
@@ -1179,6 +1183,9 @@
           status.className = 'beta-status ok';
           status.textContent = 'Check your inbox — your toolkit link is on the way.';
           form.reset();
+        } else if (result.data && result.data.error === 'invalid_code') {
+          status.className = 'beta-status err';
+          status.textContent = "That code doesn't look right. Double-check it and try again.";
         } else {
           status.className = 'beta-status err';
           status.textContent = 'Something went wrong. Try again, or email advisor@globalist.pro directly.';
