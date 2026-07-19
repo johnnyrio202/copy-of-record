@@ -1154,8 +1154,8 @@
       <form class="beta-form" id="betaForm">
         <input class="hp-field" type="text" name="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div>
-          <label for="betaName">Name (optional)</label>
-          <input type="text" id="betaName" name="name" placeholder="Jane Doe" autocomplete="name">
+          <label for="betaName">Name</label>
+          <input type="text" id="betaName" name="name" required placeholder="Jane Doe" autocomplete="name">
         </div>
         <div>
           <label for="betaEmail">Email</label>
@@ -1204,6 +1204,9 @@
         } else if (result.data && result.data.error === 'invalid_code') {
           status.className = 'beta-status err';
           status.textContent = "That code doesn't look right. Double-check it and try again.";
+        } else if (result.data && (result.data.error === 'invalid_name' || result.data.error === 'invalid_email')) {
+          status.className = 'beta-status err';
+          status.textContent = 'Name and email are both required.';
         } else {
           status.className = 'beta-status err';
           status.textContent = 'Something went wrong. Try again, or email advisor@globalist.pro directly.';
