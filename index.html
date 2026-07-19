@@ -52,7 +52,8 @@
   }
 
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     margin: 0;
     background: var(--bg);
@@ -173,6 +174,20 @@
     border-color: var(--border-strong);
   }
   .price-note { font-size: 13px; color: var(--ink-faint); }
+
+  /* ---------- floating signup CTA ---------- */
+  .floating-cta {
+    position: fixed;
+    top: 20px;
+    right: 28px;
+    z-index: 200;
+    padding: 11px 18px;
+    font-size: 14px;
+    box-shadow: 0 8px 24px -8px var(--shadow);
+  }
+  @media (max-width: 860px) {
+    .floating-cta { top: auto; bottom: 20px; right: 20px; padding: 12px 16px; }
+  }
 
   /* preview mock */
   .mockstack { position: relative; }
@@ -771,6 +786,7 @@
 </style>
 </head>
 <body>
+<a class="btn floating-cta" href="#pricing" id="floatingCta">Get the toolkit →</a>
 <nav class="wrap">
   <div class="wordmark"><span class="mark"></span>Copy of Record</div>
   <div class="links">
@@ -1169,6 +1185,15 @@
   </div>
 </section>
 <script>
+(function () {
+  var floatingCta = document.getElementById('floatingCta');
+  var nameField = document.getElementById('betaName');
+  if (floatingCta && nameField) {
+    floatingCta.addEventListener('click', function () {
+      setTimeout(function () { nameField.focus(); }, 400);
+    });
+  }
+})();
 (function () {
   var form = document.getElementById('betaForm');
   if (!form) return;
