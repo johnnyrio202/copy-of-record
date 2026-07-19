@@ -732,6 +732,10 @@
     background: var(--surface);
     padding: 40px 0 56px;
   }
+  footer .footer-inner {
+    width: 100%;
+    padding: 0 28px;
+  }
   footer .tags {
     display: flex;
     gap: 10px;
@@ -750,7 +754,7 @@
     font-size: 14.5px;
     line-height: 1.6;
     color: var(--ink-muted);
-    max-width: 60ch;
+    max-width: 100%;
   }
 
   @media (max-width: 860px) {
@@ -1248,7 +1252,7 @@
 </section>
 
 <footer>
-  <div class="wrap">
+  <div class="footer-inner">
     <div class="tags">
       <span>LinkedIn data export</span>
       <span>personal analytics</span>
