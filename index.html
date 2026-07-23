@@ -486,20 +486,15 @@
   /* ---------- steps (card catalog) ---------- */
   .steps {
     display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(220px, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 2px;
     background: var(--border);
     border: 1px solid var(--border);
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
   }
   .step {
     background: var(--surface);
     padding: 22px 20px 24px;
-    scroll-snap-align: start;
     position: relative;
-    min-width: 220px;
   }
   .step::before {
     content: attr(data-tab);
@@ -853,7 +848,9 @@
       own network clearly. Underneath the feed sits years of data about who
       you know, who's actually engaged with you, and how your reputation has
       taken shape — Copy of Record reads all of it and turns it into
-      something you can act on, entirely on your own machine.</p>
+      something you can act on, entirely on your own machine. It also doubles
+      as a way to strategically grow your LinkedIn presence and network from
+      here — not just a record of where things stand.</p>
   </div>
   <div class="ledger questions">
     <dl>
@@ -872,6 +869,10 @@
       <div class="row">
         <dt>Overdue asks</dt>
         <dd>Who should you ask for a recommendation — and who's waiting on one from you? — the recommendations audit</dd>
+      </div>
+      <div class="row">
+        <dt>Network growth &amp; altitude</dt>
+        <dd>Is your network growing, and how much of it sits at VP/Director level or above? — a read on reach and executive presence, useful for professionals managing their own brand, and for executive coaches or L&amp;D teams building out a leader's personal brand.</dd>
       </div>
     </dl>
   </div>
@@ -1096,6 +1097,7 @@
       <span class="tab">Roadmap</span>
       <h3 class="serif">Your strategy brief</h3>
       <ul>
+        <li><b>Grow strategically</b> — network growth momentum and what share of your connections sit at VP/Director level or above</li>
         <li><b>Find your next role</b> — skill gaps to close, and your warmest paths into target companies</li>
         <li><b>Find clients</b> — your most senior connections and best warm-intro prospects</li>
         <li><b>Reconnect</b> — dormant threads, endorsements you owe, past colleagues gone quiet</li>
