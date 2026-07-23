@@ -533,14 +533,12 @@
   /* ---------- deliverables ---------- */
   .folders {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
-    align-items: start;
+    gap: 20px;
   }
   .folder {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 28px 26px;
+    padding: 30px 34px;
     position: relative;
   }
   .folder .tab {
@@ -561,18 +559,26 @@
     font-size: 22px;
   }
   .folder ul {
-    margin: 16px 0 0;
+    margin: 18px 0 0;
     padding: 0;
     list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 40px;
+    row-gap: 4px;
   }
   .folder li {
-    padding: 9px 0;
-    border-top: 1px solid var(--border);
+    padding: 8px 0;
     font-size: 14.5px;
     color: var(--ink-muted);
+    border-top: 1px solid var(--border);
   }
-  .folder li:first-child { border-top: none; }
+  .folder li:nth-child(1), .folder li:nth-child(2) { border-top: none; }
   .folder li b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 640px) {
+    .folder ul { grid-template-columns: 1fr; }
+    .folder li:nth-child(2) { border-top: 1px solid var(--border); }
+  }
 
   /* ---------- privacy ledger ---------- */
   .ledger {
@@ -769,7 +775,6 @@
 
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; gap: 40px; }
-    .folders { grid-template-columns: 1fr; }
     .trust .wrap { grid-template-columns: 1fr; gap: 10px; }
     .ledger .row { grid-template-columns: 1fr; gap: 4px; }
     .sample-tiles { grid-template-columns: repeat(2, 1fr); }
